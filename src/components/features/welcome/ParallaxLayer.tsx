@@ -89,10 +89,8 @@ export function ParallaxLayer({ source, height, speed, bottom, opacity = 1 }: Pr
   return (
     <Animated.View
       pointerEvents="none"
-      style={[
-        { position: 'absolute', left: 0, bottom, flexDirection: 'row', opacity },
-        style,
-      ]}>
+      className="absolute left-0 flex-row"
+      style={[{ bottom, opacity }, style]}>
       {Array.from({ length: copies }).map((_, i) => (
         <View key={i} style={{ width: tileW, height }}>
           <ExpoImage source={source} style={{ width: tileW, height }} contentFit="fill" />

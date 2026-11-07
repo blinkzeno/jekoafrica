@@ -66,10 +66,8 @@ export function Courier({ bottom }: { bottom: number }) {
   return (
     <Animated.View
       pointerEvents="none"
-      style={[
-        { position: 'absolute', left: 0, bottom, width: SIZE, height: SIZE },
-        style,
-      ]}>
+      className="absolute left-0"
+      style={[{ bottom, width: SIZE, height: SIZE }, style]}>
       <ExpoImage
         source={require('@/assets/illustrations/welcome/courier.png')}
         style={{ width: SIZE, height: SIZE }}

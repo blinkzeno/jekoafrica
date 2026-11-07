@@ -7,7 +7,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -18,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Polygon, Rect } from 'react-native-svg';
 import { StatusBar } from 'expo-status-bar';
 
-import { JekoColors, JekoFonts, JekoRadius } from '@/constants/jeko';
+import { JekoColors } from '@/constants/jeko';
 
 const TEXT = '#0F1E1B';
 const TEXT_MUTED = '#5A6B66';
@@ -120,7 +119,7 @@ function BigCheckIcon() {
 
 function TogoFlag() {
   return (
-    <View style={styles.flagWrap}>
+    <View className="overflow-hidden rounded-[3px]">
       <Svg width={26} height={17} viewBox="0 0 500 300">
         <Rect width={500} height={60} y={0} fill="#006A4E" />
         <Rect width={500} height={60} y={60} fill="#FFCE00" />
@@ -201,23 +200,25 @@ function FloatingInput({
   const borderColor = error ? ERROR : focused ? JekoColors.emerald : BORDER;
 
   return (
-    <View style={styles.fieldWrap}>
+    <View className="gap-[5px]">
       <View
-        style={[
-          styles.field,
-          { borderColor, borderWidth: focused || error ? 1.6 : 1.2 },
-        ]}>
+        className="h-14 flex-row items-center rounded-[14px] bg-white px-[14px]"
+        style={{ borderColor, borderWidth: focused || error ? 1.6 : 1.2 }}>
         <Animated.Text
           pointerEvents="none"
           numberOfLines={1}
-          style={[styles.floatingLabel, labelStyle]}>
+          className="absolute left-[11px] z-[1] bg-white px-1 font-jeko"
+          style={labelStyle}>
           {label}
         </Animated.Text>
 
-        {leftAdornment ? <View style={styles.leftAdornment}>{leftAdornment}</View> : null}
+        {leftAdornment ? (
+          <View className="h-full flex-row items-center border-r border-[#DCE8E3] pr-3">{leftAdornment}</View>
+        ) : null}
 
         <TextInput
-          style={[styles.input, leftAdornment ? styles.inputWithLeft : null]}
+          className="h-full flex-1 px-0 font-jeko text-base text-[#0F1E1B]"
+          style={leftAdornment ? { paddingLeft: 12 } : null}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setFocused(true)}
@@ -236,11 +237,11 @@ function FloatingInput({
           testID={testID}
         />
 
-        {rightAdornment ? <View style={styles.rightAdornment}>{rightAdornment}</View> : null}
+        {rightAdornment ? <View className="h-full flex-row items-center">{rightAdornment}</View> : null}
       </View>
 
       {error ? (
-        <Text style={styles.errorText} accessibilityLiveRegion="polite">
+        <Text className="pl-1 font-jeko text-xs leading-4 text-[#BA1A1A]" accessibilityLiveRegion="polite">
           {error}
         </Text>
       ) : null}
@@ -281,61 +282,77 @@ export default function SignUpScreen() {
 
   if (created) {
     return (
-      <View style={[styles.safe, styles.successContainer]}>
+      <View className="flex-1 items-center justify-center gap-3 bg-white px-8">
         <StatusBar style="dark" />
         <Stack.Screen options={{ title: 'Compte créé' }} />
-        <View style={styles.successIcon}>
+        <View className="mb-1 h-[76px] w-[76px] items-center justify-center rounded-[38px] bg-[#E4F7EF]">
           <BigCheckIcon />
         </View>
-        <Text style={styles.successTitle}>Bienvenue, {fullName.trim().split(' ')[0]} !</Text>
-        <Text style={styles.successSubtitle}>
+        <Text className="text-center font-jeko-bold text-2xl leading-[30px] text-[#0F1E1B]">
+          Bienvenue, {fullName.trim().split(' ')[0]} !
+        </Text>
+        <Text className="mb-3 text-center font-jeko text-[15px] leading-[22px] text-[#5A6B66]">
           Votre compte Jeko est prêt. Vous pouvez maintenant commander votre première course.
         </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Retour à l'accueil"
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}>
-          <Text style={styles.primaryButtonLabel}>Retour à l&apos;accueil</Text>
+          accessibilityLabel="Continuer"
+          onPress={() => router.push('/role-selection')}
+          className="mt-1.5 h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[14px] bg-jeko-emerald"
+          style={({ pressed }) => [
+            {
+              shadowColor: JekoColors.emerald,
+              shadowOpacity: 0.28,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+              elevation: 3,
+            },
+            pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] },
+          ]}>
+          <Text className="font-jeko-semibold text-[15.5px] leading-5 text-white">Continuer</Text>
         </Pressable>
       </View>
     );
   }
 
   return (
-    <View style={styles.safe}>
+    <View className="flex-1 bg-white">
       <StatusBar style="dark" />
       <Stack.Screen options={{ title: 'Créer un compte' }} />
 
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
-          style={styles.flex}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom, 16) + 16 },
-          ]}
+          className="flex-1"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: insets.top + 8,
+            paddingBottom: Math.max(insets.bottom, 16) + 16,
+          }}
           keyboardShouldPersistTaps="handled">
-          <View style={styles.container}>
+          <View className="w-full self-center px-5" style={{ maxWidth: MAX_CONTENT_WIDTH }}>
             {/* Top bar : back arrow */}
-            <View style={styles.topBar}>
+            <View className="h-12 items-start justify-center">
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Retour"
                 hitSlop={8}
                 onPress={() => router.back()}
-                style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
+                className="-ml-[10px] h-11 w-11 items-center justify-center rounded-[22px]"
+                style={({ pressed }) => pressed && { backgroundColor: '#EEF6F2' }}>
                 <BackIcon />
               </Pressable>
             </View>
 
             {/* Title */}
-            <Text style={styles.title}>Créer un compte</Text>
-            <Text style={styles.subtitle}>Quelques informations pour commencer</Text>
+            <Text className="mt-1 font-jeko-bold text-[27px] leading-[34px] tracking-[-0.4px] text-[#0F1E1B]">
+              Créer un compte
+            </Text>
+            <Text className="mt-1.5 font-jeko text-[15px] leading-[22px] text-[#5A6B66]">
+              Quelques informations pour commencer
+            </Text>
 
             {/* Form */}
-            <View style={styles.form}>
+            <View className="mt-[26px] gap-4">
               <FloatingInput
                 label="Nom complet"
                 value={fullName}
@@ -366,9 +383,9 @@ export default function SignUpScreen() {
                 textContentType="telephoneNumber"
                 maxLength={11}
                 leftAdornment={
-                  <View style={styles.phonePrefix}>
+                  <View className="flex-row items-center gap-2">
                     <TogoFlag />
-                    <Text style={styles.phonePrefixText}>+228</Text>
+                    <Text className="font-jeko-semibold text-[15px] text-[#0F1E1B]">+228</Text>
                   </View>
                 }
                 returnKeyType="next"
@@ -396,7 +413,7 @@ export default function SignUpScreen() {
                     accessibilityLabel={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
                     hitSlop={8}
                     onPress={() => setShowPassword((v) => !v)}
-                    style={styles.eyeButton}>
+                    className="h-10 w-10 items-center justify-center">
                     {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </Pressable>
                 }
@@ -404,8 +421,8 @@ export default function SignUpScreen() {
               />
 
               {/* Terms */}
-              <View style={styles.termsBlock}>
-                <View style={styles.termsRow}>
+              <View className="mt-0.5 gap-1.5">
+                <View className="flex-row items-start gap-3">
                   <Pressable
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: termsAccepted }}
@@ -414,14 +431,16 @@ export default function SignUpScreen() {
                       setTermsAccepted((v) => !v);
                       if (errors.terms) setErrors((e) => ({ ...e, terms: undefined }));
                     }}
-                    style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}>
+                    className={`mt-px h-[22px] w-[22px] items-center justify-center rounded-md border-[1.6px] ${
+                      termsAccepted ? 'border-jeko-emerald bg-jeko-emerald' : 'border-[#B9CDC6] bg-white'
+                    }`}>
                     {termsAccepted ? <CheckIcon size={15} /> : null}
                   </Pressable>
-                  <Text style={styles.termsText}>
+                  <Text className="flex-1 font-jeko text-[13px] leading-[19px] text-[#0F1E1B]">
                     J&apos;accepte les{' '}
                     <Text
                       accessibilityRole="link"
-                      style={styles.termsLink}
+                      className="font-jeko-semibold text-jeko-emerald"
                       onPress={() =>
                         Alert.alert(
                           "Conditions d'utilisation",
@@ -433,7 +452,7 @@ export default function SignUpScreen() {
                     et la{' '}
                     <Text
                       accessibilityRole="link"
-                      style={styles.termsLink}
+                      className="font-jeko-semibold text-jeko-emerald"
                       onPress={() =>
                         Alert.alert(
                           'Politique de confidentialité',
@@ -444,7 +463,7 @@ export default function SignUpScreen() {
                     </Text>
                   </Text>
                 </View>
-                {errors.terms ? <Text style={styles.errorText}>{errors.terms}</Text> : null}
+                {errors.terms ? <Text className="pl-1 font-jeko text-xs leading-4 text-[#BA1A1A]">{errors.terms}</Text> : null}
               </View>
 
               {/* Primary action */}
@@ -452,23 +471,31 @@ export default function SignUpScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Continuer"
                 onPress={handleSubmit}
-                style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}>
-                <Text style={styles.primaryButtonLabel}>Continuer</Text>
+                className="mt-1.5 h-[52px] flex-row items-center justify-center gap-2 rounded-[14px] bg-jeko-emerald"
+                style={({ pressed }) => [
+                  {
+                    shadowColor: JekoColors.emerald,
+                    shadowOpacity: 0.28,
+                    shadowRadius: 12,
+                    shadowOffset: { width: 0, height: 6 },
+                    elevation: 3,
+                  },
+                  pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] },
+                ]}>
+                <Text className="font-jeko-semibold text-[15.5px] leading-5 text-white">Continuer</Text>
                 <ArrowRightIcon />
               </Pressable>
             </View>
 
             {/* Footer link */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Déjà un compte ? </Text>
+            <View className="mt-[22px] flex-row items-center justify-center">
+              <Text className="font-jeko text-sm text-[#5A6B66]">Déjà un compte ? </Text>
               <Pressable
                 accessibilityRole="link"
                 accessibilityLabel="Se connecter"
                 hitSlop={8}
-                onPress={() =>
-                  Alert.alert('Connexion', "L'écran de connexion arrive bientôt.")
-                }>
-                <Text style={styles.footerLink}>Se connecter</Text>
+                onPress={() => router.push('/login')}>
+                <Text className="font-jeko-semibold text-sm text-jeko-emerald">Se connecter</Text>
               </Pressable>
             </View>
           </View>
@@ -477,247 +504,3 @@ export default function SignUpScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  container: {
-    width: '100%',
-    maxWidth: MAX_CONTENT_WIDTH,
-    alignSelf: 'center',
-    paddingHorizontal: 20,
-  },
-
-  /* Top bar */
-  topBar: {
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    marginLeft: -10,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backButtonPressed: {
-    backgroundColor: '#EEF6F2',
-  },
-
-  /* Title */
-  title: {
-    fontFamily: JekoFonts.bold,
-    fontSize: 27,
-    lineHeight: 34,
-    letterSpacing: -0.4,
-    color: TEXT,
-    marginTop: 4,
-  },
-  subtitle: {
-    fontFamily: JekoFonts.regular,
-    fontSize: 15,
-    lineHeight: 22,
-    color: TEXT_MUTED,
-    marginTop: 6,
-  },
-
-  /* Form */
-  form: {
-    marginTop: 26,
-    gap: 16,
-  },
-  fieldWrap: {
-    gap: 5,
-  },
-  field: {
-    height: 56,
-    borderRadius: JekoRadius.button,
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-  },
-  floatingLabel: {
-    position: 'absolute',
-    left: 11,
-    paddingHorizontal: 4,
-    backgroundColor: '#FFFFFF',
-    fontFamily: JekoFonts.regular,
-    zIndex: 1,
-  },
-  input: {
-    flex: 1,
-    height: '100%',
-    fontFamily: JekoFonts.regular,
-    fontSize: 16,
-    color: TEXT,
-    paddingHorizontal: 0,
-  },
-  inputWithLeft: {
-    paddingLeft: 12,
-  },
-  leftAdornment: {
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRightWidth: 1,
-    borderRightColor: BORDER,
-    paddingRight: 12,
-  },
-  phonePrefix: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  phonePrefixText: {
-    fontFamily: JekoFonts.semibold,
-    fontSize: 15,
-    color: TEXT,
-  },
-  rightAdornment: {
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  eyeButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  flagWrap: {
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  errorText: {
-    fontFamily: JekoFonts.regular,
-    fontSize: 12,
-    lineHeight: 16,
-    color: ERROR,
-    paddingLeft: 4,
-  },
-
-  /* Terms */
-  termsBlock: {
-    gap: 6,
-    marginTop: 2,
-  },
-  termsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1.6,
-    borderColor: '#B9CDC6',
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  checkboxChecked: {
-    backgroundColor: JekoColors.emerald,
-    borderColor: JekoColors.emerald,
-  },
-  termsText: {
-    flex: 1,
-    fontFamily: JekoFonts.regular,
-    fontSize: 13,
-    lineHeight: 19,
-    color: TEXT,
-  },
-  termsLink: {
-    fontFamily: JekoFonts.semibold,
-    color: JekoColors.emerald,
-  },
-
-  /* Primary button */
-  primaryButton: {
-    height: 52,
-    borderRadius: JekoRadius.button,
-    backgroundColor: JekoColors.emerald,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 6,
-    shadowColor: JekoColors.emerald,
-    shadowOpacity: 0.28,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  primaryButtonPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.98 }],
-  },
-  primaryButtonLabel: {
-    fontFamily: JekoFonts.semibold,
-    fontSize: 15.5,
-    lineHeight: 20,
-    color: '#FFFFFF',
-  },
-
-  /* Footer */
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  footerText: {
-    fontFamily: JekoFonts.regular,
-    fontSize: 14,
-    color: TEXT_MUTED,
-  },
-  footerLink: {
-    fontFamily: JekoFonts.semibold,
-    fontSize: 14,
-    color: JekoColors.emerald,
-  },
-
-  /* Success state */
-  successContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    gap: 12,
-  },
-  successIcon: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    backgroundColor: '#E4F7EF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  successTitle: {
-    fontFamily: JekoFonts.bold,
-    fontSize: 24,
-    lineHeight: 30,
-    color: TEXT,
-    textAlign: 'center',
-  },
-  successSubtitle: {
-    fontFamily: JekoFonts.regular,
-    fontSize: 15,
-    lineHeight: 22,
-    color: TEXT_MUTED,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-});

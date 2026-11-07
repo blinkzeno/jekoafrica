@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Extrapolation,
   FadeInDown,
   FadeInUp,
   interpolate,
+  scrollTo,
+  useAnimatedReaction,
+  useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -18,7 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { WelcomeScene } from '@/components/features/welcome/WelcomeScene';
-import { JekoColors, JekoFonts, JekoRadius } from '@/constants/jeko';
+import { JekoColors } from '@/constants/jeko';
 
 const SLIDES = [
   {
@@ -38,6 +41,8 @@ const SLIDES = [
 const MAX_CONTENT_WIDTH = 480;
 const DOT_INACTIVE = 8;
 const DOT_ACTIVE = 24;
+const SLIDE_INTERVAL_MS = 4500;
+const SLIDE_TRANSITION_MS = 1100;
 
 function BrandPin() {
   return (
@@ -86,7 +91,7 @@ function LiveDot() {
 
   const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
-  return <Animated.View style={[styles.liveDot, animatedStyle]} />;
+  return <Animated.View className="h-1.5 w-1.5 rounded-full bg-jeko-accent" style={animatedStyle} />;
 }
 
 function Dot({
@@ -106,7 +111,7 @@ function Dot({
     };
   });
 
-  return <Animated.View style={[styles.dot, style]} />;
+  return <Animated.View className="h-2 rounded bg-white" style={style} />;
 }
 
 export default function WelcomeScreen() {
@@ -114,46 +119,88 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const contentWidth = Math.min(width, MAX_CONTENT_WIDTH);
   const scrollX = useSharedValue(0);
+  const autoX = useSharedValue(0);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const slideIndex = useSharedValue(0);
 
   const onScroll = useAnimatedScrollHandler((event) => {
     scrollX.value = event.contentOffset.x;
   });
 
+  useAnimatedReaction(
+    () => autoX.value,
+    (x) => {
+      scrollTo(scrollRef, x, 0, false);
+    }
+  );
+
+  const onScrollEnd = (event: { nativeEvent: { contentOffset: { x: number } } }) => {
+    if (contentWidth <= 0) return;
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / contentWidth);
+    const clamped = Math.max(0, Math.min(nextIndex, SLIDES.length - 1));
+    slideIndex.value = clamped;
+    autoX.value = clamped * contentWidth;
+  };
+
+  useEffect(() => {
+    if (contentWidth <= 0) return;
+
+    const id = setInterval(() => {
+      slideIndex.value = (slideIndex.value + 1) % SLIDES.length;
+      autoX.value = withTiming(slideIndex.value * contentWidth, {
+        duration: SLIDE_TRANSITION_MS,
+        easing: Easing.inOut(Easing.cubic),
+      });
+    }, SLIDE_INTERVAL_MS);
+
+    return () => clearInterval(id);
+  }, [autoX, contentWidth, slideIndex]);
+
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-jeko-gradient-from">
       <WelcomeScene bottomInset={insets.bottom} />
 
-      <View style={[styles.top, { paddingTop: insets.top + 16 }]}>
+      <View className="items-stretch" style={{ paddingTop: insets.top + 16 }}>
         <Animated.View
           entering={FadeInDown.duration(600)}
-          style={[styles.header, { width: contentWidth }]}>
-          <View style={styles.brandRow}>
-            <View style={styles.logoBadge}>
+          className="flex-row items-center justify-between self-center px-5 pb-2 pt-3"
+          style={{ width: contentWidth }}>
+          <View className="flex-row items-center gap-2">
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/10">
               <BrandPin />
             </View>
-            <Text style={styles.logoText}>Jeko</Text>
+            <Text className="font-jeko-bold text-[22px] leading-7 tracking-[-0.4px] text-white">Jeko</Text>
           </View>
 
-          <View style={styles.locationPill}>
+          <View className="flex-row items-center gap-1.5 rounded-full bg-white/15 px-3 py-1">
             <LiveDot />
-            <Text style={styles.locationText}>Lomé • Togo</Text>
+            <Text className="font-jeko-semibold text-[11px] leading-[14px] tracking-[0.5px] text-white">
+              Lomé • Togo
+            </Text>
           </View>
         </Animated.View>
 
         <Animated.ScrollView
+          ref={scrollRef}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onScroll={onScroll}
+          onMomentumScrollEnd={onScrollEnd}
+          onScrollEndDrag={onScrollEnd}
           scrollEventThrottle={16}
-          style={[styles.carousel, { width: contentWidth }]}>
+          className="mt-8 grow-0 self-center"
+          style={{ width: contentWidth }}>
           {SLIDES.map((slide, index) => (
             <Animated.View
               key={index}
               entering={FadeInDown.delay(250).duration(700)}
-              style={[styles.slide, { width: contentWidth }]}>
-              <Text style={styles.title}>{slide.title}</Text>
-              <Text style={styles.subtitle}>{slide.subtitle}</Text>
+              className="px-5"
+              style={{ width: contentWidth }}>
+              <Text className="font-jeko-bold text-[26px] leading-[34px] tracking-[-0.4px] text-white">
+                {slide.title}
+              </Text>
+              <Text className="mt-3 font-jeko text-base leading-6 text-[#bcffe9d9]">{slide.subtitle}</Text>
             </Animated.View>
           ))}
         </Animated.ScrollView>
@@ -162,7 +209,8 @@ export default function WelcomeScreen() {
           entering={FadeInUp.delay(500)}
           accessibilityRole="tablist"
           accessibilityLabel="Étapes d'introduction"
-          style={[styles.dotsRow, { width: contentWidth }]}>
+          className="mt-6 flex-row items-center gap-2 self-center px-5"
+          style={{ width: contentWidth }}>
           {SLIDES.map((_, index) => (
             <Dot key={index} index={index} scrollX={scrollX} width={contentWidth} />
           ))}
@@ -171,174 +219,41 @@ export default function WelcomeScreen() {
 
       <Animated.View
         entering={FadeInUp.delay(700).duration(600)}
-        style={[
-          styles.footer,
-          {
-            width: contentWidth,
-            paddingBottom: Math.max(insets.bottom, 16) + 8,
-          },
-        ]}>
+        className="absolute bottom-0 items-center gap-3 self-center px-5"
+        style={{
+          width: contentWidth,
+          paddingBottom: Math.max(insets.bottom, 16) + 8,
+        }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Commencer"
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
+          className="h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[14px] bg-white"
+          style={({ pressed }) => [
+            {
+              shadowColor: '#000000',
+              shadowOpacity: 0.18,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+              elevation: 4,
+            },
+            pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] },
+          ]}
           onPress={() => router.push('/signup')}>
-          <Text style={styles.primaryButtonLabel}>Commencer</Text>
+          <Text className="font-jeko-semibold text-[15px] leading-5 text-jeko-emerald">Commencer</Text>
           <ArrowRight />
         </Pressable>
 
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="J'ai déjà un compte"
-          style={({ pressed }) => [styles.linkButton, pressed && styles.linkButtonPressed]}
-          onPress={() => {
-            // TODO: navigate to sign in once it exists.
-          }}>
-          <Text style={styles.linkLabel}>J&apos;ai déjà un compte</Text>
+          className="px-4 py-2"
+          style={({ pressed }) => pressed && { opacity: 0.6 }}
+          onPress={() => router.push('/login')}>
+          <Text className="font-jeko-semibold text-[13px] leading-[18px] text-white/90">
+            J&apos;ai déjà un compte
+          </Text>
         </Pressable>
       </Animated.View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: JekoColors.gradientFrom,
-  },
-  top: {
-    alignItems: 'stretch',
-  },
-  header: {
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  logoBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: JekoColors.surface10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoText: {
-    fontFamily: JekoFonts.bold,
-    fontSize: 22,
-    lineHeight: 28,
-    letterSpacing: -0.4,
-    color: JekoColors.white,
-  },
-  locationPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: JekoRadius.pill,
-    backgroundColor: JekoColors.surface15,
-  },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: JekoColors.accent,
-  },
-  locationText: {
-    fontFamily: JekoFonts.semibold,
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 0.5,
-    color: JekoColors.white,
-  },
-  carousel: {
-    alignSelf: 'center',
-    flexGrow: 0,
-    marginTop: 32,
-  },
-  slide: {
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontFamily: JekoFonts.bold,
-    fontSize: 26,
-    lineHeight: 34,
-    letterSpacing: -0.4,
-    color: JekoColors.white,
-  },
-  subtitle: {
-    fontFamily: JekoFonts.regular,
-    fontSize: 16,
-    lineHeight: 24,
-    color: JekoColors.textSoft,
-    marginTop: 12,
-  },
-  dotsRow: {
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    marginTop: 24,
-  },
-  dot: {
-    height: DOT_INACTIVE,
-    borderRadius: DOT_INACTIVE / 2,
-    backgroundColor: JekoColors.white,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    alignSelf: 'center',
-    paddingHorizontal: 20,
-    gap: 12,
-    alignItems: 'center',
-  },
-  primaryButton: {
-    width: '100%',
-    height: 52,
-    borderRadius: JekoRadius.button,
-    backgroundColor: JekoColors.white,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    shadowColor: '#000000',
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
-  },
-  primaryButtonPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.98 }],
-  },
-  primaryButtonLabel: {
-    fontFamily: JekoFonts.semibold,
-    fontSize: 15,
-    lineHeight: 20,
-    color: JekoColors.emerald,
-  },
-  linkButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  linkButtonPressed: {
-    opacity: 0.6,
-  },
-  linkLabel: {
-    fontFamily: JekoFonts.semibold,
-    fontSize: 13,
-    lineHeight: 18,
-    color: JekoColors.textMuted,
-  },
-});

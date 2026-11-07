@@ -1,6 +1,6 @@
 import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 
 import { Courier } from './Courier';
 import { ParallaxLayer } from './ParallaxLayer';
@@ -22,11 +22,12 @@ export function WelcomeScene({ bottomInset }: { bottomInset: number }) {
   const skyShift = -Math.round(height * 0.27);
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <LinearGradient colors={['#0B3D36', '#0E7C66']} style={StyleSheet.absoluteFill} />
+    <View className="absolute inset-0" pointerEvents="none">
+      <LinearGradient colors={['#0B3D36', '#0E7C66']} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }} />
       <ExpoImage
         source={require('@/assets/illustrations/welcome/sky.png')}
-        style={[StyleSheet.absoluteFill, { transform: [{ translateY: skyShift }] }]}
+        className="absolute inset-0"
+        style={{ transform: [{ translateY: skyShift }] }}
         contentFit="cover"
       />
       <Sparkles />

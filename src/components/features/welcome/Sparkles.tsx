@@ -72,7 +72,7 @@ const STARS: StarProps[] = [
 /** Étoiles qui scintillent dans le ciel (formes en code, pas d'image). */
 export function Sparkles() {
   return (
-    <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 260 }}>
+    <View pointerEvents="none" className="absolute left-0 right-0 top-0 h-[260px]">
       {STARS.map((star, i) => (
         <Star key={i} {...star} />
       ))}
