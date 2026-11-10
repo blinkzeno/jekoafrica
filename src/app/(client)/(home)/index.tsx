@@ -5,6 +5,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { StatusBar } from 'expo-status-bar';
 
 import { JekoColors } from '@/constants/jeko';
+import MiniMap from '@/components/features/map/MiniMap';
 
 const MAX_CONTENT_WIDTH = 480;
 
@@ -18,18 +19,6 @@ function BellIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </Svg>
-  );
-}
-
-function MapPinIcon() {
-  return (
-    <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"
-        fill={JekoColors.emerald}
-      />
-      <Circle cx={12} cy={9} r={2.6} fill="#FFFFFF" />
     </Svg>
   );
 }
@@ -118,6 +107,7 @@ export default function ClientHomeScreen() {
 
       <ScrollView
         className="flex-1"
+        nestedScrollEnabled
         contentContainerStyle={{
           paddingTop: insets.top + 12,
           paddingBottom: 20,
@@ -147,21 +137,8 @@ export default function ClientHomeScreen() {
 
           {/* Map / request card */}
           <View className="mx-5 mt-5 overflow-hidden rounded-[20px] bg-white p-3 shadow-sm">
-            <View className="h-[150px] items-center justify-center overflow-hidden rounded-[14px] bg-[#EAF4F0]">
-              <View className="absolute inset-0">
-                <View className="absolute left-0 right-0 top-[32%] h-px bg-[#D6E6E0]" />
-                <View className="absolute left-0 right-0 top-[58%] h-px bg-[#D6E6E0]" />
-                <View className="absolute left-0 right-0 top-[82%] h-px bg-[#D6E6E0]" />
-                <View className="absolute bottom-0 left-[22%] top-0 w-px bg-[#D6E6E0]" />
-                <View className="absolute bottom-0 left-[48%] top-0 w-px bg-[#D6E6E0]" />
-                <View className="absolute bottom-0 left-[74%] top-0 w-px bg-[#D6E6E0]" />
-                <View className="absolute left-[38%] top-[36%] h-16 w-20 rounded-xl bg-[#DCEFE8]" />
-                <View className="absolute right-[14%] top-[18%] h-10 w-14 rounded-lg bg-[#DCEFE8]" />
-              </View>
-              <View className="items-center">
-                <MapPinIcon />
-                <View className="mt-1 h-2 w-2 rounded-full bg-jeko-emerald/30" />
-              </View>
+            <View className="h-[150px] overflow-hidden rounded-[14px] bg-[#EAF4F0]">
+              <MiniMap />
             </View>
             <Pressable
               accessibilityRole="button"
@@ -247,6 +224,7 @@ export default function ClientHomeScreen() {
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Suivre la course"
+                  onPress={() => router.push('/(client)/(home)/live-map' as import('expo-router').Href)}
                   className="rounded-[12px] bg-jeko-emerald px-4 py-2.5"
                   style={({ pressed }) => pressed && { opacity: 0.9 }}>
                   <Text className="font-jeko-semibold text-[13px] text-white">Suivre</Text>

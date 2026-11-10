@@ -1,0 +1,24 @@
+{
+  "colors": {
+    "primary": "#00614F",
+    "primaryForeground": "#FFFFFF",
+    "background": "#FFFFFF",
+    "foreground": "#0B3D36",
+    "mutedForeground": "#60646C",
+    "input": "#F2F7F5",
+    "inputForeground": "#0B3D36",
+    "border": "#DCE7E3",
+    "ring": "#FD761A",
+    "neutral": "#9AA5A1",
+    "muted": "#F0F5F3",
+    "danger": "#DC2626",
+    "success": "#0E7C66",
+    "warning": "#FD761A",
+    "shadow": "#0B3D3620",
+    "secondaryButtonBackground": "#F0F5F3",
+    "secondaryButtonForeground": "#0B3D36"
+  },
+  "design": {
+    "borderRadius": 14
+  }
+}

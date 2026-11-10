@@ -6,6 +6,8 @@ export default function HomeStackLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="couriers" />
       <Stack.Screen name="courier/[id]" />
+      <Stack.Screen name="live-map" />
+      <Stack.Screen name="nearby" />
     </Stack>
   );
 }
