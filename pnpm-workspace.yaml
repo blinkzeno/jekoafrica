@@ -1,3 +1,15 @@
+# Windows MAX_PATH (260) : sans ça, les chemins CMake/prefab/objets de
+# react-native-screens & react-native-worklets dépassent 260 caractères.
+# Ninja embarqué (CMake 3.22) traite alors les fichiers comme absents et boucle
+# ("build.ninja still dirty after 100 tries") ou échoue sur mkdir().
+# hoisted = node_modules à plat (comme npm), sans symlinks vers .pnpm.
+nodeLinker: hoisted
+# Garde-fou si un store virtuel est recréé.
+virtualStoreDirMaxLength: 30
+
+allowBuilds:
+  browser-tabs-lock: true
+  core-js: true
 minimumReleaseAgeExclude:
   - '@expo/cli@58.1.19'
   - '@expo/config-plugins@58.0.12'
